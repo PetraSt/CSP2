@@ -15,13 +15,13 @@ common_words = ['the', 'of', 'and', 'a', 'in', 'to', '#1)', '#2)', 'on', '#3)', 
                 'journey']
 
 
-def duck_client_join():
+def duck_client_join(x):
     query = """SELECT publisher.publisher_name
             FROM publisher
             JOIN book ON book.publisher_id = publisher.publisher_id
             GROUP BY publisher.publisher_id, publisher.publisher_name
             HAVING COUNT(DISTINCT book.language_id) >= {};"""
-    cursor = duckdb.connect(database="bookstore.db", read_only=True)
+    cursor = duckdb.connect(database="bookstore"+str(x*10000)+".db", read_only=True)
     cursor.execute("begin transaction")
     for i in range(0, 100):
         final_query = query.format((i % 27) + 1)
@@ -30,11 +30,11 @@ def duck_client_join():
     tuple_count = cursor.fetchall()
 
 
-def duck_client_integer():
+def duck_client_integer(x):
     query = """SELECT count(*), avg(num_pages) FROM book
             WHERE num_pages>={} AND num_pages<{};"""
 
-    cursor = duckdb.connect(database="bookstore.db", read_only=True)
+    cursor = duckdb.connect(database="bookstore"+str(x*10000)+".db", read_only=True)
     cursor.execute("begin transaction")
     for i in range(0, 7000, 70):
         final_query = query.format(i, i + 70)
@@ -43,11 +43,11 @@ def duck_client_integer():
     tuple_count = cursor.fetchall()
 
 
-def duck_client_string():
+def duck_client_string(x):
     query = """SELECT count(*), avg(num_pages) FROM book
                 WHERE title LIKE '%{}%';"""
 
-    cursor = duckdb.connect(database="bookstore.db", read_only=True)
+    cursor = duckdb.connect(database="bookstore"+str(x*10000)+".db", read_only=True)
     cursor.execute("begin transaction")
     for i in range(0, 100):
         final_query = query.format(common_words[i])
@@ -56,7 +56,7 @@ def duck_client_string():
     tuple_count = cursor.fetchall()
 
 
-def duck_transactions(times, query_type):
+def duck_transactions(times, query_type, x):
     # Create a list of threads
     threads = []
 
@@ -64,13 +64,13 @@ def duck_transactions(times, query_type):
     # Create and start a thread for each set of arguments
     for i in range(0, times):
         if query_type == 1:
-            thread = threading.Thread(target=duck_client_join())
+            thread = threading.Thread(target=duck_client_join, args=(x))
             threads.append(thread)
         elif query_type == 2:
-            thread = threading.Thread(target=duck_client_integer())
+            thread = threading.Thread(target=duck_client_intege, args=(x))
             threads.append(thread)
         else:
-            thread = threading.Thread(target=duck_client_string())
+            thread = threading.Thread(target=duck_client_string, args=(x))
             threads.append(thread)
 
     for thread in threads:
@@ -83,7 +83,7 @@ def duck_transactions(times, query_type):
     return (time.time() - start) * 1000
 
 
-def postgres_client_join():
+def postgres_client_join(x):
     query = """SELECT publisher.publisher_name
                 FROM publisher
                 JOIN book ON book.publisher_id = publisher.publisher_id
@@ -91,7 +91,7 @@ def postgres_client_join():
                 HAVING COUNT(DISTINCT book.language_id) >= {};"""
     conn = psycopg2.connect(
         host="localhost",
-        database="bookstore",
+        database="bookstore"+str(x*10000),
         user="postgres",
         password="root"
     )
@@ -105,12 +105,12 @@ def postgres_client_join():
     tuple_count = cursor.fetchall()
 
 
-def postgres_client_integer():
+def postgres_client_integer(x):
     query = """SELECT count(*), avg(num_pages) FROM book
             WHERE num_pages>={} AND num_pages<{};"""
     conn = psycopg2.connect(
         host="localhost",
-        database="bookstore",
+        database="bookstore"+str(x*10000),
         user="postgres",
         password="root"
     )
@@ -124,12 +124,12 @@ def postgres_client_integer():
     tuple_count = cursor.fetchall()
 
 
-def postgres_client_string():
+def postgres_client_string(x):
     query = """SELECT count(*), avg(num_pages) FROM book
                 WHERE title LIKE '%{}%';"""
     conn = psycopg2.connect(
         host="localhost",
-        database="bookstore",
+        database="bookstore"+str(x*10000),
         user="postgres",
         password="root"
     )
@@ -142,7 +142,7 @@ def postgres_client_string():
     conn.commit()
 
 
-def postgres_transactions(times, query_type):
+def postgres_transactions(times, query_type, x):
     # Create a list of threads
 
     threads = []
@@ -151,13 +151,13 @@ def postgres_transactions(times, query_type):
     # Create and start a thread for each set of arguments
     for i in range(0, times):
         if query_type == 1:
-            thread = threading.Thread(target=postgres_client_join())
+            thread = threading.Thread(target=postgres_client_join, args=(x))
             threads.append(thread)
         elif query_type == 2:
-            thread = threading.Thread(target=postgres_client_integer())
+            thread = threading.Thread(target=postgres_client_integer, args=(x))
             threads.append(thread)
         else:
-            thread = threading.Thread(target=postgres_client_string())
+            thread = threading.Thread(target=postgres_client_string, args=(x))
             threads.append(thread)
 
     for thread in threads:
@@ -173,72 +173,27 @@ def postgres_transactions(times, query_type):
 def main(k):
     with open('output2_'+str(k)+'0000_select_join.csv', mode='w') as file:
         writer = csv.writer(file)
-        return_time = duck_transactions(1, 1)
+        return_time = duck_transactions(1, 1,k)
         writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 1)
+        return_time = duck_transactions(5, 1,k)
         writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 1)
+        return_time = duck_transactions(10, 1,k)
         writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 1)
+        return_time = duck_transactions(15, 1,k)
         writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 1)
+        return_time = duck_transactions(20, 1,k)
         writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 1)
+        return_time = postgres_transactions(1, 1,k)
         writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 1)
+        return_time = postgres_transactions(5, 1,k)
         writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 1)
+        return_time = postgres_transactions(10, 1,k)
         writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 1)
+        return_time = postgres_transactions(15, 1,k)
         writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 1)
+        return_time = postgres_transactions(20, 1,k)
         writer.writerow(['postgres', 20, return_time])
 
-    with open('output2_'+str(k)+'0000_select_integer.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(1, 2)
-        writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 2)
-        writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 2)
-        writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 2)
-        writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 2)
-        writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 2)
-        writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 2)
-        writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 2)
-        writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 2)
-        writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 2)
-        writer.writerow(['postgres', 20, return_time])
-
-    with open('output2_'+str(k)+'0000_select_string.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(1, 3)
-        writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 3)
-        writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 3)
-        writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 3)
-        writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 3)
-        writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 3)
-        writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 3)
-        writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 3)
-        writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 3)
-        writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 3)
-        writer.writerow(['postgres', 20, return_time])
 
 
 if __name__ == '__main__':
