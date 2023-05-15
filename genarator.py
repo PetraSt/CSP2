@@ -13491,14 +13491,15 @@ def resize_data(data_times):
 
 
 def main():
-    start = time.time()
-    cursor = create_duckdb('bookstore10000.db')
-    import_language_all(cursor, language_data)
-    import_publisher_all(cursor, publisher_data)
-    new_book_data = resize_data(10000)
-    import_book_all(cursor, new_book_data)
-    print("duckdb: %.1f ms" % ((time.time() - start) * 1000))
-    cursor.close()
+    for x in range(1,11):
+        start = time.time()
+        cursor = create_duckdb('bookstore' + str(x*10000) + '.db')
+        import_language_all(cursor, language_data)
+        import_publisher_all(cursor, publisher_data)
+        new_book_data = resize_data(x * 10000)
+        import_book_all(cursor, new_book_data)
+        print("duckdb: %.1f ms" % ((time.time() - start) * 1000))
+        cursor.close()
 
 
 if __name__ == '__main__':

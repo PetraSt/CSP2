@@ -13422,11 +13422,13 @@ book_data = [('The World''s First Love: Mary  Mother of God', 1, '8987059752', 2
 ('The Great Divorce', 11127, '9790007672386', 1, 160, '2002-02-01', 882)]
 
 
-def connect_postgre():
+def connect_postgre(x):
     # connect to the PostgreSQL database
+    db = "bookstore"+str(x*10000)
+    print(db)
     conn = psycopg2.connect(
         host="localhost",
-        database="bookstore",
+        database=db,
         user="postgres",
         password="root"
     )
@@ -13508,8 +13510,8 @@ def resize_data(data_times):
 
 def main():
     start = time.time()
-
-    conn = connect_postgre()
+    x=10
+    conn = connect_postgre(x)
     # create a cursor object
     cursor = conn.cursor()
     cursor.execute('DROP TABLE IF EXISTS book ')
@@ -13517,7 +13519,7 @@ def main():
     cursor.execute('DROP TABLE IF EXISTS book_language ')
     import_language_all(conn, cursor, language_data)
     import_publisher_all(conn, cursor, publisher_data)
-    new_book_data = resize_data(20000)
+    new_book_data = resize_data(x*10000)
     import_book_all(conn, cursor, new_book_data)
     print("postgres: %.1f ms" % ((time.time() - start) * 1000))
     cursor.close()
