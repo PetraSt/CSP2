@@ -1,7 +1,6 @@
 import duckdb
 import time
 
-con = duckdb.connect(database="bookstore.db", read_only=True)
 
 # Number of iterations
 num_iterations = 100
@@ -11,7 +10,8 @@ cpu_output_file = 'cpu_time_duck.txt'
 wall_output_file = 'wall_time_duck.txt'
 
 # Connect to the DuckDB database
-conn = duckdb.connect(database)
+conn = duckdb.connect(database="bookstore.db", read_only=True)
+# conn = duckdb.connect(database)
 
 # Create a cursor
 cursor = conn.cursor()

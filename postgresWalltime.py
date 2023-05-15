@@ -3,9 +3,9 @@ import time
 
 conn = psycopg2.connect(
     host="localhost",
-    database="bpi",
-    user="bpi",
-    password="123"
+    database="bookstore",
+    user="postgres",
+    password="root"
 )
 
 num_iterations = 100
