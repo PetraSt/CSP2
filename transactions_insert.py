@@ -52,30 +52,26 @@ def postgres_transactions(times):
     return (time.time() - start) * 1000
 
 
-def main():
-    with open('output20000_insert.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(100)
-        writer.writerow(['duckdb', 100, return_time])
-        return_time = duck_transactions(500)
-        writer.writerow(['duckdb', 500, return_time])
-        return_time = duck_transactions(1000)
-        writer.writerow(['duckdb', 1000, return_time])
-        return_time = duck_transactions(1500)
-        writer.writerow(['duckdb', 1500, return_time])
-        return_time = duck_transactions(2000)
-        writer.writerow(['duckdb', 2000, return_time])
-        return_time = postgres_transactions(100)
-        writer.writerow(['postgres', 100, return_time])
-        return_time = postgres_transactions(500)
-        writer.writerow(['postgres', 500, return_time])
-        return_time = postgres_transactions(1000)
-        writer.writerow(['postgres', 1000, return_time])
-        return_time = postgres_transactions(1500)
-        writer.writerow(['postgres', 1500, return_time])
-        return_time = postgres_transactions(2000)
-        writer.writerow(['postgres', 2000, return_time])
+def main(insert_times_duck, insert_times_postgres):
+    for key in insert_times_duck:
+        return_time = duck_transactions(key)
+        insert_times_duck[key].append(return_time)
+    for key in insert_times_postgres:
+        return_time = postgres_transactions(key)
+        insert_times_postgres[key].append(return_time)
 
 
 if __name__ == '__main__':
-    main()
+    for z in range(1, 11):
+        keys = [100, 500, 1000, 1500, 2000]
+        insert_time_duck = {key: [] for key in keys}
+        insert_time_postgres = {key: [] for key in keys}
+        num_iterations = 10
+        for j in range(0, 10):
+            main(insert_time_duck, insert_time_postgres)
+        with open('output3_' + str(z) + '0000_insert.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for key in insert_time_duck:
+                writer.writerow(['duckdb', key, sum(insert_time_duck[key]) / num_iterations])
+            for key in insert_time_postgres:
+                writer.writerow(['postgres', key, sum(insert_time_postgres[key]) / num_iterations])
