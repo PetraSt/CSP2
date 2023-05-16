@@ -171,76 +171,58 @@ def postgres_transactions(times, query_type, x):
     return (time.time() - start) * 1000
 
 
-def main(k):
-    with open('output2_' + str(k) + '0000_select_join.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(1, 1, k)
-        writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 1, k)
-        writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 1, k)
-        writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 1, k)
-        writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 1, k)
-        writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 1, k)
-        writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 1, k)
-        writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 1, k)
-        writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 1, k)
-        writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 1, k)
-        writer.writerow(['postgres', 20, return_time])
+def main(k, join_times_duck, join_times_postgres, integer_times_duck, integer_times_postgres, string_times_duck,
+         string_times_postgres):
+    for key in join_times_duck:
+        return_time = duck_transactions(key, 1, k)
+        join_times_duck[key].append(return_time)
+    for key in join_times_postgres:
+        return_time = postgres_transactions(key, 1, k)
+        join_times_postgres[key].append(return_time)
 
-    with open('output2_' + str(k) + '0000_select_integer.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(1, 2, k)
-        writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 2, k)
-        writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 2, k)
-        writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 2, k)
-        writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 2, k)
-        writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 2, k)
-        writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 2, k)
-        writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 2, k)
-        writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 2, k)
-        writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 2, k)
-        writer.writerow(['postgres', 20, return_time])
+    for key in integer_times_duck:
+        return_time = duck_transactions(key, 2, k)
+        integer_times_duck[key].append(return_time)
+    for key in integer_times_postgres:
+        return_time = postgres_transactions(key, 2, k)
+        integer_times_postgres[key].append(return_time)
 
-    with open('output2_' + str(k) + '0000_select_string.csv', mode='w') as file:
-        writer = csv.writer(file)
-        return_time = duck_transactions(1, 3, k)
-        writer.writerow(['duckdb', 1, return_time])
-        return_time = duck_transactions(5, 3, k)
-        writer.writerow(['duckdb', 5, return_time])
-        return_time = duck_transactions(10, 3, k)
-        writer.writerow(['duckdb', 10, return_time])
-        return_time = duck_transactions(15, 3, k)
-        writer.writerow(['duckdb', 15, return_time])
-        return_time = duck_transactions(20, 3, k)
-        writer.writerow(['duckdb', 20, return_time])
-        return_time = postgres_transactions(1, 3, k)
-        writer.writerow(['postgres', 1, return_time])
-        return_time = postgres_transactions(5, 3, k)
-        writer.writerow(['postgres', 5, return_time])
-        return_time = postgres_transactions(10, 3, k)
-        writer.writerow(['postgres', 10, return_time])
-        return_time = postgres_transactions(15, 3, k)
-        writer.writerow(['postgres', 15, return_time])
-        return_time = postgres_transactions(20, 3, k)
-        writer.writerow(['postgres', 20, return_time])
+    for key in string_times_duck:
+        return_time = duck_transactions(key, 3, k)
+        string_times_duck[key].append(return_time)
+    for key in string_times_postgres:
+        return_time = postgres_transactions(key, 3, k)
+        string_times_postgres[key].append(return_time)
+
 
 if __name__ == '__main__':
     for z in range(1, 11):
-        main(z)
+        keys = [1, 5, 10, 15, 20]
+        join_time_duck = {key: [] for key in keys}
+        join_time_postgres = {key: [] for key in keys}
+        integer_time_duck = {key: [] for key in keys}
+        integer_time_postgres = {key: [] for key in keys}
+        string_time_duck = {key: [] for key in keys}
+        string_time_postgres = {key: [] for key in keys}
+        num_iterations = 10
+        for j in range(0, 10):
+            main(z, join_time_duck, join_time_postgres, integer_time_duck, integer_time_postgres, string_time_duck,
+                 string_time_postgres)
+        with open('output3_' + str(z) + '0000_select_join.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for key in join_time_duck:
+                writer.writerow(['duckdb', key, sum(join_time_duck[key]) / num_iterations])
+            for key in join_time_postgres:
+                writer.writerow(['postgres', key, sum(join_time_postgres[key]) / num_iterations])
+        with open('output3_' + str(z) + '0000_select_integer.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for key in integer_time_duck:
+                writer.writerow(['duckdb', key, sum(integer_time_duck[key]) / num_iterations])
+            for key in integer_time_postgres:
+                writer.writerow(['postgres', key, sum(integer_time_postgres[key]) / num_iterations])
+        with open('output3_' + str(z) + '0000_select_string.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for key in string_time_duck:
+                writer.writerow(['duckdb', key, sum(string_time_duck[key]) / num_iterations])
+            for key in string_time_postgres:
+                writer.writerow(['postgres', key, sum(string_time_postgres[key]) / num_iterations])
