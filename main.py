@@ -1,18 +1,19 @@
 import duckdb
 import threading
 
-def my_function():
-    print("Starting my_function...")
-    # do some work here
+def my_function(x):
+    cursor = duckdb.connect(database="bookstore10000.db")
+    query = "INSERT INTO publisher VALUES ('blas', {} );"
+    query = query.format(x)
+    cursor.execute(query)
 
-    cursor = duckdb.connect()
-    print(cursor.execute('SELECT 42').fetchall())
-    print("Finished my_function!")
+    cursor.commit()
+
 
 threads = []
 for i in range(5):
     # create a new thread and append it to the list
-    thread = threading.Thread(target=my_function)
+    thread = threading.Thread(target=my_function, args=(i+10000+1,))
     threads.append(thread)
 
 # start all threads

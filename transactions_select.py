@@ -21,7 +21,7 @@ def duck_client_join(x):
             JOIN book ON book.publisher_id = publisher.publisher_id
             GROUP BY publisher.publisher_id, publisher.publisher_name
             HAVING COUNT(DISTINCT book.language_id) >= {};"""
-    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db", read_only=True)
+    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db")
     cursor.execute("begin transaction")
     for i in range(0, 100):
         final_query = query.format((i % 27) + 1)
@@ -34,7 +34,7 @@ def duck_client_integer(x):
     query = """SELECT count(*), avg(num_pages) FROM book
             WHERE num_pages>={} AND num_pages<{};"""
 
-    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db", read_only=True)
+    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db")
     cursor.execute("begin transaction")
     for i in range(0, 7000, 70):
         final_query = query.format(i, i + 70)
@@ -47,7 +47,7 @@ def duck_client_string(x):
     query = """SELECT count(*), avg(num_pages) FROM book
                 WHERE title LIKE '%{}%';"""
 
-    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db", read_only=True)
+    cursor = duckdb.connect(database="bookstore" + str(x * 10000) + ".db")
     cursor.execute("begin transaction")
     for i in range(0, 100):
         final_query = query.format(common_words[i])

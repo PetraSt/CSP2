@@ -13491,7 +13491,7 @@ def resize_data(data_times):
 
 
 def main():
-    for x in range(1,11):
+    for x in range(1,2):
         start = time.time()
         cursor = create_duckdb('bookstore' + str(x*10000) + '.db')
         import_language_all(cursor, language_data)

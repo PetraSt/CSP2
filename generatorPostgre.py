@@ -13442,7 +13442,11 @@ def create_publisher(conn, cursor, data):
                    "publisher_name VARCHAR(400),"
                    "CONSTRAINT pk_publisher "
                    "PRIMARY KEY (publisher_id));")
+
+    cursor.execute('CREATE INDEX publisher_publisher_name_idx ON publisher(publisher_name);')
+
     cursor.executemany("INSERT INTO publisher (publisher_name, publisher_id) VALUES (%s, %s)", data)
+
     conn.commit()
 
 
@@ -13454,6 +13458,9 @@ def create_language(conn, cursor, data):
                    'language_name VARCHAR(50),'
                    'CONSTRAINT pk_language '
                    'PRIMARY KEY (language_id));')
+
+    cursor.execute('CREATE INDEX book_language_language_name_idx ON book_language(language_name);')
+
     cursor.executemany("INSERT INTO book_language (language_code, language_id, language_name) VALUES (%s, %s, %s)", data)
     conn.commit()
 
@@ -13475,6 +13482,11 @@ def create_book(conn, cursor, data):
                        "(title, book_id, isbn13, language_id, num_pages, publication_date, publisher_id) "
                        "VALUES (%s, %s, %s, %s, %s, %s, %s)", data)
 
+    cursor.execute('CREATE INDEX books_title_idx ON book(title);')
+    cursor.execute('CREATE INDEX books_publication_date_idx ON book(publication_date);')
+    cursor.execute('CREATE INDEX books_num_pages_idx ON book(num_pages);')
+    cursor.execute('CREATE INDEX books_publisher_id_idx ON book(publisher_id);')
+    cursor.execute('CREATE INDEX books_language_id_idx ON book(language_id);')
     conn.commit()
 
 
