@@ -16,7 +16,9 @@ queries = ['''SELECT COUNT(book_id)
     VALUES ('The Metamorphosis', {}, '8987059752', 2, 276, '1996-09-01', 1010);''',
            ''' UPDATE book
     SET title = 'The Idiot'
-    WHERE language_id = 19 AND publisher_id = (SELECT publisher_id FROM publisher WHERE publisher_name = 'Russian literature');''', ]
+    WHERE language_id = 19 AND publisher_id = (SELECT publisher_id FROM publisher WHERE publisher_name = 'Russian literature');''',
+'''DELETE FROM book
+    WHERE book_id = {};''']
 
 # Number of iterations
 num_iterations = 100
@@ -30,6 +32,7 @@ def run_query(k):
     query_type = 0
     with open('duckDB_times_' + str(k) + '0000.csv', mode='w') as file:
         insert_id = k * 10000
+        delete_id = 1234
         writer = csv.writer(file)
         for query in queries:
             # Connect to the DuckDB database
@@ -51,6 +54,9 @@ def run_query(k):
                 if query_type == 2:
                     insert_id += 1
                     query2 = query.format(insert_id)
+                if query_type == 4:
+                    delete_id -= 1
+                    query2 = query.format(delete_id)
                 cursor.execute(query2)
 
                 end_cpu = time.process_time()
